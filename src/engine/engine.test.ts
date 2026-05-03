@@ -1,5 +1,10 @@
 import { parseNetlist } from './parser';
 import { solveDC } from './solver';
+import { ComplexValue } from './types';
+
+function toNumber(value: ComplexValue | undefined): number {
+  return typeof value === 'number' ? value : NaN;
+}
 
 // Simple manual test script to verify core logic
 function runTests() {
@@ -15,15 +20,17 @@ function runTests() {
   try {
     const circuit1 = parseNetlist(netlist1);
     const results1 = solveDC(circuit1);
+    const node2Voltage = toNumber(results1.nodeVoltages['2']);
+    const r1Current = toNumber(results1.branchCurrents['R1']);
     
     console.log('Test 1: Simple Voltage Divider');
-    if (results1.nodeVoltages['2'] === 5) {
+    if (node2Voltage === 5) {
       console.log('✅ Node 2 voltage is 5V');
     } else {
       console.error('❌ Node 2 voltage expected 5V, got', results1.nodeVoltages['2']);
     }
 
-    if (Math.abs(results1.branchCurrents['R1'] - 0.005) < 1e-6) {
+    if (Math.abs(r1Current - 0.005) < 1e-6) {
       console.log('✅ R1 current is 5mA');
     } else {
       console.error('❌ R1 current expected 5mA, got', results1.branchCurrents['R1']);
