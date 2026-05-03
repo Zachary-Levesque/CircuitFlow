@@ -25,7 +25,7 @@ export function solveDC(circuit: Circuit): SimulationResult {
   // Size of MNA matrix is (n + m) x (n + m)
   const size = n + m;
   if (size === 0) {
-    return { nodeVoltages: {}, branchCurrents: {}, powerDissipation: {}, error: 'Empty circuit' };
+    return { nodeVoltages: {}, branchCurrents: {}, voltageDrops: {}, powerDissipation: {}, error: 'Empty circuit' };
   }
 
   const A = math.zeros(size, size) as math.Matrix;
@@ -131,6 +131,7 @@ export function solveDC(circuit: Circuit): SimulationResult {
     return {
       nodeVoltages: {},
       branchCurrents: {},
+      voltageDrops: {},
       powerDissipation: {},
       error: errorMessage
     };
