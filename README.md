@@ -48,7 +48,7 @@ Supported component types:
 - `I` current source
 - `W` wire
 
-## How We Built It
+## How I Built It
 
 CircuitFlow is a TypeScript + React application with a small simulation engine organized inside the repo.
 
@@ -186,13 +186,3 @@ CircuitFlow sits in a useful middle ground:
 - and simpler to extend than a large simulation platform.
 
 That makes it a strong foundation for learning, portfolio work, and future engineering features.
-
-## Possible Next Steps
-
-Natural extensions for the project include:
-
-- richer device models,
-- better automated testing,
-- more advanced plotting controls,
-- import/export improvements,
-- and larger schematic editing capabilities.
