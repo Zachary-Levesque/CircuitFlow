@@ -242,28 +242,34 @@ const App: React.FC = () => {
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                   <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center space-x-2">
                     <Activity className="w-4 h-4 text-slate-400" />
-                    <span className="text-xs font-black uppercase tracking-widest text-slate-600">Branch Analysis</span>
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-600">Component Analysis</span>
                   </div>
                   <table className="w-full text-sm text-left">
                     <thead className="text-[10px] uppercase bg-slate-50/50 text-slate-400 border-b border-slate-200">
                       <tr>
-                        <th className="px-5 py-3 font-black">RefID</th>
-                        <th className="px-5 py-3 font-black">Current (A)</th>
-                        <th className="px-5 py-3 font-black">Power (W)</th>
+                        <th className="px-5 py-3 font-black">ID</th>
+                        <th className="px-5 py-3 font-black">ΔV (V)</th>
+                        <th className="px-5 py-3 font-black">I (A)</th>
+                        <th className="px-5 py-3 font-black">P (W)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {Object.entries(results.branchCurrents).map(([id, current]) => (
-                        <tr key={id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-5 py-3 font-black text-slate-500">{id}</td>
-                          <td className="px-5 py-3 font-mono font-bold text-emerald-600">
-                            {current.toExponential(3)}
-                          </td>
-                          <td className="px-5 py-3 font-mono font-bold text-amber-600">
-                            {results.powerDissipation[id]?.toExponential(3)}
-                          </td>
-                        </tr>
-                      ))}
+                      {Object.entries(results.branchCurrents)
+                        .filter(([id]) => !id.startsWith('W'))
+                        .map(([id, current]) => (
+                          <tr key={id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-5 py-3 font-black text-slate-500">{id}</td>
+                            <td className="px-5 py-3 font-mono font-bold text-blue-600">
+                              {results.voltageDrops[id]?.toFixed(4)}
+                            </td>
+                            <td className="px-5 py-3 font-mono font-bold text-emerald-600">
+                              {current.toExponential(2)}
+                            </td>
+                            <td className="px-5 py-3 font-mono font-bold text-amber-600">
+                              {results.powerDissipation[id]?.toExponential(2)}
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
