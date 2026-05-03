@@ -6,7 +6,8 @@ export interface Component {
   nodeA: string;
   nodeB: string;
   value: number;
-  originalValue: string; // To keep track of units like 1k, 1u
+  originalValue: string;
+  position?: { x1: number; y1: number; x2: number; y2: number }; // Coordinates for visual rendering
 }
 
 export interface Circuit {
