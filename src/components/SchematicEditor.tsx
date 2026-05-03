@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Component, ComponentType } from '../engine/types';
-import { Trash2, MousePointer2, Settings2, X, Check } from 'lucide-react';
+import { Trash2, MousePointer2, Settings2, X, Check, RotateCw } from 'lucide-react';
 
 interface SchematicEditorProps {
   components: Component[];
@@ -95,6 +95,20 @@ const SchematicEditor: React.FC<SchematicEditorProps> = ({
     }
   };
 
+  const handleFlip = (c: Component) => {
+    if (!c.position) return;
+    onUpdateComponent(c.id, {
+      nodeA: c.nodeB,
+      nodeB: c.nodeA,
+      position: {
+        x1: c.position.x2,
+        y1: c.position.y2,
+        x2: c.position.x1,
+        y2: c.position.y1
+      }
+    });
+  };
+
   const renderComponent = (c: Component) => {
     if (!c.position) return null;
     const { x1, y1, x2, y2 } = c.position;
@@ -131,6 +145,18 @@ const SchematicEditor: React.FC<SchematicEditorProps> = ({
           )}
           {c.type === 'W' && (
              <circle cx="0" cy="0" r="4" fill={isSelected ? '#3b82f6' : '#64748b'} />
+          )}
+
+          {/* Polarity Markers */}
+          {c.type !== 'W' && (
+            <>
+              <g transform={`translate(-25, -12) rotate(${-angle})`}>
+                <text textAnchor="middle" dominantBaseline="middle" className="text-[14px] font-black fill-red-500">+</text>
+              </g>
+              <g transform={`translate(25, -12) rotate(${-angle})`}>
+                <text textAnchor="middle" dominantBaseline="middle" className="text-[14px] font-black fill-slate-500">-</text>
+              </g>
+            </>
           )}
         </g>
         
@@ -257,6 +283,16 @@ const SchematicEditor: React.FC<SchematicEditorProps> = ({
               )}
 
               <div className="flex space-x-2 pt-2 border-t border-slate-100">
+                <button 
+                  onClick={() => {
+                    const comp = components.find(c => c.id === selectedId);
+                    if (comp) handleFlip(comp);
+                  }}
+                  className="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-[10px] font-black uppercase transition-all"
+                >
+                  <RotateCw size={12} />
+                  <span>Flip</span>
+                </button>
                 <button 
                   onClick={() => { onRemoveComponent(selectedId); setSelectedId(null); }}
                   className="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-[10px] font-black uppercase transition-all"
