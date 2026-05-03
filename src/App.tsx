@@ -55,6 +55,13 @@ const App: React.FC = () => {
     runSimulation(newNetlist);
   };
 
+  const handleClear = () => {
+    setComponents([]);
+    setNetlist('* New Circuit\n');
+    setResults(null);
+    setError(null);
+  };
+
   useEffect(() => {
     runSimulation();
   }, []);
@@ -152,7 +159,7 @@ const App: React.FC = () => {
               components={components} 
               onAddComponent={handleAddComponent} 
               onRemoveComponent={handleRemoveComponent}
-              onUpdateComponent={() => {}} 
+              onClear={handleClear}
             />
           )}
           

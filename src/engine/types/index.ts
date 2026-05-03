@@ -1,4 +1,4 @@
-export type ComponentType = 'R' | 'V' | 'I';
+export type ComponentType = 'R' | 'V' | 'I' | 'W';
 
 export interface Component {
   id: string;
@@ -7,7 +7,7 @@ export interface Component {
   nodeB: string;
   value: number;
   originalValue: string;
-  position?: { x1: number; y1: number; x2: number; y2: number }; // Coordinates for visual rendering
+  position?: { x1: number; y1: number; x2: number; y2: number };
 }
 
 export interface Circuit {

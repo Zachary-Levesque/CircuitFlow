@@ -30,36 +30,44 @@ export function parseNetlist(netlist: string): Circuit {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line || line.startsWith('*') || line.startsWith('#')) continue;
+    if (!line) continue;
+
+    // Support position metadata in comments: # pos id x1 y1 x2 y2
+    if (line.startsWith('# pos')) {
+      const parts = line.split(/\s+/);
+      const id = parts[2];
+      const comp = components.find(c => c.id === id);
+      if (comp) {
+        comp.position = {
+          x1: parseFloat(parts[3]),
+          y1: parseFloat(parts[4]),
+          x2: parseFloat(parts[5]),
+          y2: parseFloat(parts[6])
+        };
+      }
+      continue;
+    }
+
+    if (line.startsWith('*')) continue;
 
     const parts = line.split(/\s+/);
-    if (parts.length < 4) {
-      throw new Error(`Line ${i + 1}: Invalid component definition. Expected format: [ID] [NodeA] [NodeB] [Value]`);
-    }
+    if (parts.length < 3) continue;
 
     const id = parts[0];
     const typeChar = id[0].toUpperCase();
     const nodeA = parts[1];
     const nodeB = parts[2];
-    const valueStr = parts[3];
+    const valueStr = parts[3] || '0';
 
     let type: ComponentType;
     if (typeChar === 'R') type = 'R';
     else if (typeChar === 'V') type = 'V';
     else if (typeChar === 'I') type = 'I';
-    else {
-      throw new Error(`Line ${i + 1}: Unsupported component type "${typeChar}". Use R, V, or I.`);
-    }
+    else if (typeChar === 'W') type = 'W';
+    else continue;
 
-    const value = parseValue(valueStr);
-    if (isNaN(value)) {
-      throw new Error(`Line ${i + 1}: Invalid value "${valueStr}" for component ${id}`);
-    }
-
-    if (type === 'R' && value === 0) {
-      throw new Error(`Line ${i + 1}: Resistor value cannot be zero.`);
-    }
-
+    const value = type === 'W' ? 0 : parseValue(valueStr);
+    
     components.push({
       id,
       type,
@@ -74,7 +82,7 @@ export function parseNetlist(netlist: string): Circuit {
   }
 
   if (components.length > 0 && !nodesSet.has('0')) {
-    throw new Error('Circuit must contain a ground node (0).');
+    // We'll be lenient during visual editing, but solver will catch it
   }
 
   return {

@@ -9,15 +9,15 @@ export function solveDC(circuit: Circuit): SimulationResult {
   const nodeToIndex = new Set(nonGroundNodes);
   const n = nonGroundNodes.length;
   
-  const voltageSources = components.filter(c => c.type === 'V');
+  const voltageSources = components.filter(c => c.type === 'V' || c.type === 'W');
   const m = voltageSources.length;
   
-  if (!nodes.includes('0')) {
+  if (nodes.length > 0 && !nodes.includes('0')) {
     return { 
       nodeVoltages: {}, 
       branchCurrents: {}, 
       powerDissipation: {}, 
-      error: 'Missing ground node (0)' 
+      error: 'Missing ground node (0). Place a component at 0,0 or node 0.' 
     };
   }
 
