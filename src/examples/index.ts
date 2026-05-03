@@ -2,10 +2,10 @@ export const EXAMPLES = [
   {
     name: 'Simple Voltage Divider',
     netlist: `* Simple Voltage Divider
-V1 10_10 10_6 10
+V1 0 10_6 10
 R1 10_6 14_6 1k
 R2 14_6 14_10 1k
-W1 14_10 10_10
+W1 14_10 0
 
 # pos V1 400 400 400 240
 # pos R1 400 240 560 240
@@ -15,13 +15,13 @@ W1 14_10 10_10
   {
     name: 'Parallel Circuit',
     netlist: `* Parallel Resistors
-V1 10_10 10_6 12
+V1 0 10_6 12
 W1 10_6 14_6
 R1 14_6 14_10 2k
 W2 14_6 18_6
 R2 18_6 18_10 2k
 W3 18_10 14_10
-W4 14_10 10_10
+W4 14_10 0
 
 # pos V1 400 400 400 240
 # pos W1 400 240 560 240
@@ -34,7 +34,7 @@ W4 14_10 10_10
   {
     name: 'Bridge Circuit',
     netlist: `* Bridge Network
-V1 10_10 10_6 12
+V1 0 10_6 12
 W1 10_6 14_6
 R1 14_6 18_4 2k
 R2 14_6 18_8 2k
@@ -42,7 +42,7 @@ R3 18_4 22_6 1k
 R4 18_8 22_6 1k
 R5 18_4 18_8 500
 W2 22_6 22_10
-W3 22_10 10_10
+W3 22_10 0
 
 # pos V1 400 400 400 240
 # pos W1 400 240 560 240
