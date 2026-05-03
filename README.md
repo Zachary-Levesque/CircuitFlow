@@ -6,7 +6,7 @@ CircuitFlow is a browser-based circuit simulation project built to make electric
 
 This project was built around a few clear goals:
 
-- Make circuit analysis more approachable without reducing it to a toy.
+- Make circuit analysis more approachable.
 - Let users move quickly between code-style circuit definitions and visual editing.
 - Show simulation results in a way that is easy to inspect and modify.
 - Provide useful built-in starter circuits so users can begin from working examples instead of a blank screen.
@@ -22,7 +22,6 @@ It helps with:
 - Prototyping simple circuits before moving into heavier tools.
 - Visualizing component voltage and current behavior over time or frequency.
 - Editing a circuit from either a schematic-style interface or a netlist directly.
-- Starting from built-in examples and modifying them instead of building everything from scratch.
 
 ## What The App Does
 
@@ -31,11 +30,6 @@ CircuitFlow currently supports:
 - `DC analysis` for steady-state behavior.
 - `AC analysis` for phasor-based frequency-domain simulation.
 - `Transient analysis` for time-domain behavior using time stepping.
-- `Code mode` for direct netlist editing.
-- `Visual mode` for placing and editing components on a schematic grid.
-- `Built-in starter circuits` in each analysis mode.
-- `Component plotting` for voltage and current traces in AC and transient views.
-- `Component editing` including value changes and polarity flipping for two-terminal parts.
 
 Supported component types:
 
@@ -78,20 +72,6 @@ CircuitFlow uses matrix-based circuit solving with `math.js`.
 - `Transient analysis` uses time stepping with companion models for reactive elements.
 
 This structure keeps the project readable: the UI manages interaction, while the engine handles circuit math independently.
-
-## Project Structure
-
-```text
-src/
-├── components/      # UI pieces such as charts, landing page, plot selector, schematic editor
-├── engine/
-│   ├── parser/      # Netlist parsing and serialization
-│   ├── solver/      # DC, AC, and transient solving logic
-│   └── types/       # Shared types
-├── examples/        # Built-in starter circuits for each analysis mode
-├── App.tsx          # Main application flow
-└── main.tsx         # App bootstrap
-```
 
 ## How To Use It
 
@@ -143,17 +123,6 @@ R1 10_6 14_6 1k
 C1 14_6 14_10 1u
 W1 14_10 0
 ```
-
-General patterns:
-
-- `R[id] nodeA nodeB value`
-- `L[id] nodeA nodeB value`
-- `C[id] nodeA nodeB value`
-- `D[id] nodeA nodeB value`
-- `V[id] nodeA nodeB value phase`
-- `I[id] nodeA nodeB value phase`
-- `Q[id] nodeBase nodeEmitter nodeCollector model beta`
-- `W[id] nodeA nodeB`
 
 Notes:
 
