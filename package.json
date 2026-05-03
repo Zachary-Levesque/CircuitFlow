@@ -1,0 +1,40 @@
+{
+  "name": "circuitflow",
+  "version": "1.0.0",
+  "description": "CircuitFlow is a real-time circuit simulation platform for designing and analyzing electrical circuits. It uses matrix-based nodal analysis to compute voltages, currents, and power, with interactive visualization, dynamic updates, and support for DC, AC, and transient simulations.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zachary-Levesque/CircuitFlow.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Zachary-Levesque/CircuitFlow/issues"
+  },
+  "homepage": "https://github.com/Zachary-Levesque/CircuitFlow#readme",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.14.0",
+    "mathjs": "^15.2.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "recharts": "^3.8.1",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10"
+  }
+}
