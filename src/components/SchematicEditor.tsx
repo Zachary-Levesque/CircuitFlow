@@ -10,6 +10,7 @@ interface SchematicEditorProps {
 }
 
 const GRID_SIZE = 40;
+const GROUND_COORD = { x: 10, y: 10 };
 
 const SchematicEditor: React.FC<SchematicEditorProps> = ({ 
   components, 
@@ -20,6 +21,13 @@ const SchematicEditor: React.FC<SchematicEditorProps> = ({
   const [placing, setPlacing] = useState<{ type: ComponentType; start: { x: number; y: number } | null }>({ type: 'R', start: null });
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
   const svgRef = useRef<SVGSVGElement>(null);
+
+  const toNodeName = (x: number, y: number) => {
+    const gx = x / GRID_SIZE;
+    const gy = y / GRID_SIZE;
+    if (gx === GROUND_COORD.x && gy === GROUND_COORD.y) return '0';
+    return `${gx}_${gy}`;
+  };
 
   const getGridCoords = (e: React.MouseEvent) => {
     if (!svgRef.current) return { x: 0, y: 0 };
@@ -41,8 +49,8 @@ const SchematicEditor: React.FC<SchematicEditorProps> = ({
       
       const count = components.filter(c => c.type === placing.type).length + 1;
       const id = `${placing.type}${count}`;
-      const nodeA = `${placing.start.x/GRID_SIZE}_${placing.start.y/GRID_SIZE}`;
-      const nodeB = `${coords.x/GRID_SIZE}_${coords.y/GRID_SIZE}`;
+      const nodeA = toNodeName(placing.start.x, placing.start.y);
+      const nodeB = toNodeName(coords.x, coords.y);
       
       onAddComponent({
         id,
@@ -111,32 +119,32 @@ const SchematicEditor: React.FC<SchematicEditorProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-slate-50 rounded-xl border border-slate-200 overflow-hidden shadow-inner">
-      <div className="bg-white border-b border-slate-200 p-3 flex items-center justify-between">
-        <div className="flex space-x-2">
+      <div className="bg-white border-b border-slate-200 p-2 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex space-x-1">
           {(['R', 'V', 'I', 'W'] as ComponentType[]).map(t => (
             <button
               key={t}
               onClick={() => setPlacing({ type: t, start: null })}
-              className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${placing.type === t ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+              className={`px-2 py-1.5 rounded-md text-[10px] font-black uppercase tracking-tight transition-all ${placing.type === t ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
             >
-              {t === 'R' ? 'Resistor' : t === 'V' ? 'Voltage' : t === 'I' ? 'Current' : 'Wire'}
+              {t === 'R' ? 'Res' : t === 'V' ? 'Volt' : t === 'I' ? 'Curr' : 'Wire'}
             </button>
           ))}
         </div>
         
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full">
-            <MousePointer2 size={14} className={placing.start ? 'animate-pulse' : ''} />
-            <span className="text-[10px] font-black uppercase tracking-tight">
-              {placing.start ? 'Select End Point' : 'Select Start Point'}
+        <div className="flex items-center space-x-2">
+          <div className="hidden sm:flex items-center space-x-1.5 px-2 py-1 bg-blue-50 text-blue-700 rounded-md">
+            <MousePointer2 size={12} className={placing.start ? 'animate-pulse' : ''} />
+            <span className="text-[9px] font-black uppercase tracking-tighter">
+              {placing.start ? 'End' : 'Start'}
             </span>
           </div>
           <button 
             onClick={onClear}
-            className="flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            className="flex items-center space-x-1 px-2 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-[10px] font-black uppercase transition-all"
           >
-            <Trash2 size={14} />
-            <span>Clear All</span>
+            <Trash2 size={12} />
+            <span>Clear</span>
           </button>
         </div>
       </div>
@@ -159,9 +167,10 @@ const SchematicEditor: React.FC<SchematicEditorProps> = ({
           <rect width="100%" height="100%" fill="url(#grid)" />
           
           {/* Ground Marker */}
-          <g transform={`translate(${GRID_SIZE*10}, ${GRID_SIZE*10})`}>
-            <path d="M -10 0 L 10 0 M -7 4 L 7 4 M -3 8 L 3 8" stroke="#94a3b8" strokeWidth="2" />
-            <text y="-10" textAnchor="middle" className="text-[10px] font-black fill-slate-400">GND (0)</text>
+          <g transform={`translate(${GRID_SIZE*GROUND_COORD.x}, ${GRID_SIZE*GROUND_COORD.y})`}>
+            <circle r="8" fill="#10b981" fillOpacity="0.1" />
+            <path d="M -8 0 L 8 0 M -5 3 L 5 3 M -2 6 L 2 6" stroke="#10b981" strokeWidth="2" />
+            <text y="-12" textAnchor="middle" className="text-[9px] font-black fill-emerald-600 uppercase tracking-tighter">GROUND (0)</text>
           </g>
 
           {components.map(renderComponent)}
