@@ -18,6 +18,7 @@ export interface Circuit {
 export interface SimulationResult {
   nodeVoltages: Record<string, number>;
   branchCurrents: Record<string, number>;
+  voltageDrops: Record<string, number>;
   powerDissipation: Record<string, number>;
   error?: string;
 }
