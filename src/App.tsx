@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Play, FileText, Activity, AlertCircle, Layout, Database, Edit3, Code } from 'lucide-react';
+import { Play, FileText, Activity, AlertCircle, Edit3, Code } from 'lucide-react';
 import { parseNetlist } from './engine/parser';
 import { serializeCircuit } from './engine/parser/serializer';
 import { solveDC } from './engine/solver';
-import { SimulationResult, Circuit, Component } from './engine/types';
+import { SimulationResult, Component } from './engine/types';
 import { EXAMPLES } from './examples';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import SchematicEditor from './components/SchematicEditor';
 
 const App: React.FC = () => {
@@ -13,7 +12,7 @@ const App: React.FC = () => {
   const [components, setComponents] = useState<Component[]>([]);
   const [results, setResults] = useState<SimulationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'visual' | 'code'>('code');
+  const [mode, setMode] = useState<'visual' | 'code'>('visual');
 
   useEffect(() => {
     try {
@@ -66,17 +65,10 @@ const App: React.FC = () => {
     runSimulation();
   }, []);
 
-  const chartData = results ? Object.entries(results.nodeVoltages)
-    .filter(([node]) => node !== '0')
-    .map(([node, voltage]) => ({
-      name: `Node ${node}`,
-      voltage: parseFloat(voltage.toFixed(4))
-    })) : [];
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+      <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-wrap items-center justify-between sticky top-0 z-10 gap-4">
         <div className="flex items-center space-x-2">
           <Activity className="w-8 h-8 text-blue-600" />
           <div>
@@ -139,7 +131,6 @@ const App: React.FC = () => {
                   <FileText className="w-4 h-4" />
                   <span className="text-xs font-black uppercase tracking-widest">Netlist (SPICE)</span>
                 </div>
-                <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">LATEST BUILD</span>
               </div>
               <textarea
                 value={netlist}
@@ -175,113 +166,56 @@ const App: React.FC = () => {
         </div>
 
         {/* Results Panel */}
-        <div className="lg:col-span-7 space-y-6 overflow-auto">
+        <div className="lg:col-span-7 flex flex-col h-[700px]">
           {results ? (
-            <>
-              {/* Visualization */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <Layout className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <h2 className="text-lg font-black uppercase tracking-tight">Voltage Distribution</h2>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-400 border border-slate-200 px-2 py-1 rounded">DC OPERATING POINT</div>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
+              <div className="bg-slate-50 px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Activity className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm font-black uppercase tracking-widest text-slate-700">Component Analysis</span>
                 </div>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} />
-                      <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} label={{ value: 'Volts', angle: -90, position: 'insideLeft', fontSize: 10, fontWeight: 700 }} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        cursor={{fill: '#f8fafc'}}
-                      />
-                      <Bar dataKey="voltage" radius={[6, 6, 0, 0]} barSize={40}>
-                        {chartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.voltage >= 0 ? '#3b82f6' : '#ef4444'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="text-[10px] font-black text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
+                  DC OPERATING POINT
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-                {/* Voltages Table */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center space-x-2">
-                    <Database className="w-4 h-4 text-slate-400" />
-                    <span className="text-xs font-black uppercase tracking-widest text-slate-600">Nodal Potentials</span>
-                  </div>
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-[10px] uppercase bg-slate-50/50 text-slate-400 border-b border-slate-200">
-                      <tr>
-                        <th className="px-5 py-3 font-black">Node Identifier</th>
-                        <th className="px-5 py-3 font-black">Value (V)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {Object.entries(results.nodeVoltages).sort().map(([node, voltage]) => (
-                        <tr key={node} className="hover:bg-slate-50/50 transition-colors group">
-                          <td className="px-5 py-3 font-bold text-slate-700">
-                            {node === '0' ? <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[10px]">GROUND REFERENCE</span> : `NODE ${node}`}
+              <div className="flex-1 overflow-auto">
+                <table className="w-full text-sm text-left border-collapse">
+                  <thead className="text-[11px] uppercase bg-slate-50 text-slate-500 sticky top-0 z-10 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-4 font-black">ID</th>
+                      <th className="px-6 py-4 font-black">Voltage (V)</th>
+                      <th className="px-6 py-4 font-black">Current (A)</th>
+                      <th className="px-6 py-4 font-black">Power (W)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {Object.entries(results.branchCurrents)
+                      .filter(([id]) => !id.startsWith('W'))
+                      .map(([id, current]) => (
+                        <tr key={id} className="hover:bg-blue-50/30 transition-colors group">
+                          <td className="px-6 py-4 font-black text-slate-600 group-hover:text-blue-600 transition-colors">{id}</td>
+                          <td className="px-6 py-4 font-mono font-bold text-slate-700">
+                            {results.voltageDrops[id]?.toFixed(4)}
                           </td>
-                          <td className={`px-5 py-3 font-mono font-bold ${voltage === 0 ? 'text-slate-300' : 'text-blue-600'}`}>
-                            {voltage.toFixed(6)}
+                          <td className="px-6 py-4 font-mono font-bold text-emerald-600">
+                            {current.toExponential(2)}
+                          </td>
+                          <td className="px-6 py-4 font-mono font-bold text-amber-600">
+                            {results.powerDissipation[id]?.toExponential(2)}
                           </td>
                         </tr>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Currents Table */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center space-x-2">
-                    <Activity className="w-4 h-4 text-slate-400" />
-                    <span className="text-xs font-black uppercase tracking-widest text-slate-600">Component Analysis</span>
-                  </div>
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-[10px] uppercase bg-slate-50/50 text-slate-400 border-b border-slate-200">
-                      <tr>
-                        <th className="px-5 py-3 font-black">ID</th>
-                        <th className="px-5 py-3 font-black">ΔV (V)</th>
-                        <th className="px-5 py-3 font-black">I (A)</th>
-                        <th className="px-5 py-3 font-black">P (W)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {Object.entries(results.branchCurrents)
-                        .filter(([id]) => !id.startsWith('W'))
-                        .map(([id, current]) => (
-                          <tr key={id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="px-5 py-3 font-black text-slate-500">{id}</td>
-                            <td className="px-5 py-3 font-mono font-bold text-blue-600">
-                              {results.voltageDrops[id]?.toFixed(4)}
-                            </td>
-                            <td className="px-5 py-3 font-mono font-bold text-emerald-600">
-                              {current.toExponential(2)}
-                            </td>
-                            <td className="px-5 py-3 font-mono font-bold text-amber-600">
-                              {results.powerDissipation[id]?.toExponential(2)}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
+                  </tbody>
+                </table>
               </div>
-            </>
+            </div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-slate-300 py-20 bg-white rounded-xl border-2 border-dashed border-slate-200">
-              <div className="bg-slate-50 p-6 rounded-full mb-6">
+            <div className="h-full flex flex-col items-center justify-center text-slate-300 bg-white rounded-xl border-2 border-dashed border-slate-200 p-12">
+              <div className="bg-slate-50 p-8 rounded-full mb-6 ring-8 ring-slate-50/50">
                 <Activity className="w-16 h-16 opacity-20" />
               </div>
-              <p className="text-xl font-black uppercase tracking-tighter text-slate-400">Engine Standby</p>
-              <p className="text-sm font-medium mt-2">Initialize simulation to view analysis</p>
+              <p className="text-xl font-black uppercase tracking-tighter text-slate-400">Analysis Pending</p>
+              <p className="text-sm font-medium mt-2 text-slate-400">Configure your circuit and click simulate</p>
             </div>
           )}
         </div>
