@@ -1,124 +1,81 @@
 # CircuitFlow
 
-CircuitFlow is a real-time circuit simulation platform for designing and analyzing electrical circuits. It uses matrix-based nodal analysis to compute voltages, currents, and power, with interactive visualization, dynamic updates, and support for DC, AC, and transient simulations.
+CircuitFlow is a production-quality real-time circuit simulation platform built with React, TypeScript, and Nodal Analysis Engineering. It allows users to design, analyze, and visualize electrical circuits directly in the browser using a SPICE-like domain-specific language (DSL).
 
----
+## 🚀 Key Features
 
-## 🚀 Overview
+- **SPICE-like DSL Editor:** Real-time parsing of netlist definitions.
+- **Modified Nodal Analysis (MNA) Solver:** Robust matrix-based engine for computing exact node voltages and branch currents.
+- **Interactive Visualization:** Dynamic bar charts for node voltages and detailed result tables for currents and power dissipation.
+- **Example Library:** Instant loading of classic circuits like bridge networks and multiple source configurations.
+- **Validation & Error Handling:** Detailed feedback for malformed netlists, floating nodes, and missing ground references.
 
-CircuitFlow is a modern, lightweight alternative to traditional circuit simulators. It enables users to build circuits visually or programmatically and simulate their behavior in real time.
+## 🛠️ Tech Stack
 
-This project demonstrates:
-- Strong systems design
-- Numerical methods (linear algebra, ODEs)
-- Full-stack engineering
-- Real-time data processing and visualization
-
----
-
-## ⚡ Features
-
-### 🧠 Simulation Engine
-- Nodal Analysis (KCL-based)
-- Matrix formulation: G · V = I
-- Linear system solving
-- Supports:
-  - DC Analysis
-  - AC Analysis (frequency sweep)
-  - Transient Analysis (time-domain simulation)
-
-### 🎨 Interactive Circuit Builder
-- Drag-and-drop components
-- Wire connections between nodes
-- Editable parameters (R, C, L, sources)
-
-### 📊 Visualization
-- Voltage vs time graphs
-- Current vs time graphs
-- Frequency response (Bode plots)
-- Real-time updates as parameters change
-
-### 🧾 SPICE-like Input (DSL)
-Define circuits programmatically:
-V1 1 0 DC 10
-R1 1 2 1000
-C1 2 0 1uF
-
-
-### 💾 Save & Load
-- Export/import circuits (JSON)
-- Shareable configurations
-
----
-
-## 🧱 Tech Stack
-
-### Frontend
-- React + TypeScript
-- Canvas / SVG rendering
-
-### Backend (optional)
-- Node.js or Python (FastAPI)
-
-### Core Engine
-- TypeScript or Python
-- Linear algebra (math.js / numpy)
-
----
+- **Frontend:** React 18, TypeScript, Tailwind CSS
+- **Icons:** Lucide React
+- **Mathematics:** math.js (for linear algebra and matrix solving)
+- **Charts:** Recharts
+- **Build Tool:** Vite
 
 ## 📐 Architecture
-Frontend (UI)
-↓
-Circuit Parser (DSL / UI input)
-↓
-Matrix Builder (Nodal Analysis)
-↓
-Solver Engine (Linear Algebra)
-↓
-Simulation Engine (DC / AC / Transient)
-↓
-Visualization Layer (Graphs)
+
+CircuitFlow follows a clean, modular architecture:
+
+```
+src/
+├── engine/
+│   ├── parser/      # Netlist to Circuit Graph conversion
+│   ├── solver/      # MNA DC Solver implementation
+│   ├── types/       # Shared domain models and interfaces
+├── components/      # UI building blocks
+├── examples/        # Pre-defined circuit templates
+└── App.tsx          # Main application orchestration
+```
+
+### Numerical Engine (MNA)
+The core simulation engine implements **Modified Nodal Analysis (MNA)**. It constructs a system of linear equations in the form of an MNA matrix:
+- **G Matrix:** Conductance contributions from resistors.
+- **B/C Matrices:** Connection constraints for independent voltage sources.
+- **Z Vector:** Input current and voltage source values.
+
+The system is solved using LU decomposition (`math.lusolve`) to provide high precision results.
+
+## 🏃 Getting Started
+
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Build for Production:**
+   ```bash
+   npm run build
+   ```
+
+## 📝 Netlist Syntax
+
+CircuitFlow supports standard SPICE-like syntax:
+
+- **Resistors:** `R[ID] [NodeA] [NodeB] [Value]` (e.g., `R1 1 0 1k`)
+- **Voltage Sources:** `V[ID] [NodeA] [NodeB] [Value]` (e.g., `V1 1 0 10`)
+- **Current Sources:** `I[ID] [NodeA] [NodeB] [Value]` (e.g., `I1 0 2 5m`)
+
+**Notes:**
+- Ground node must always be labeled `0`.
+- Supports unit prefixes: `p, n, u, m, k, Meg, G`.
+
+## 🔮 Future Improvements
+
+- **Transient Analysis:** Time-domain simulation using ODE solvers (Euler/Runge-Kutta).
+- **AC Analysis:** Frequency sweep with Bode plots.
+- **Non-linear Components:** Diodes and Transistors (using Newton-Raphson iteration).
+- **Visual Schematic Editor:** Drag-and-drop component placement.
 
 ---
-
-## 🧠 Core Concepts
-
-- Kirchhoff’s Current Law (KCL)
-- Nodal Analysis
-- Matrix systems
-- Frequency domain analysis
-- Differential equations (transient response)
-
----
-
-## 🔥 Future Improvements
-
-- Nonlinear components (diodes, transistors)
-- Symbolic circuit solving
-- Optimization mode (auto-tune components)
-- Large-scale circuit performance (sparse matrices)
-- Real-time streaming simulations
-
----
-
-## 🎯 Why This Project Matters
-
-CircuitFlow is designed to showcase:
-- Advanced problem solving
-- Engineering rigor
-- Real-world system design
-- Clean UI + technical depth
-
-This is not just a project — it is a product-level system.
-
----
-
-## 📸 Demo (Coming Soon)
-- UI screenshots
-- Simulation examples
-- Interactive demos
-
----
-
-## 📜 License
-MIT License
+Built with ❤️ by Gemini CLI
