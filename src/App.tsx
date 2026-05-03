@@ -36,8 +36,63 @@ const App: React.FC = () => {
   const [mode, setMode] = useState<'visual' | 'code'>('visual');
   const [view, setView] = useState<'table' | 'chart'>('table');
   const [frequency, setFrequency] = useState<number>(60);
+  const [frequencyInput, setFrequencyInput] = useState<string>('60');
+  const [sweepStartFreq, setSweepStartFreq] = useState<number>(1);
+  const [sweepStartFreqInput, setSweepStartFreqInput] = useState<string>('1');
+  const [sweepEndFreq, setSweepEndFreq] = useState<number>(1000000);
+  const [sweepEndFreqInput, setSweepEndFreqInput] = useState<string>('1000000');
   const [tStop, setTStop] = useState<number>(0.1);
+  const [tStopInput, setTStopInput] = useState<string>('0.1');
   const [tStep, setTStep] = useState<number>(0.001);
+  const [tStepInput, setTStepInput] = useState<string>('0.001');
+
+  const commitPositiveNumber = (
+    rawValue: string,
+    currentValue: number,
+    setValue: React.Dispatch<React.SetStateAction<number>>,
+    setInput: React.Dispatch<React.SetStateAction<string>>
+  ) => {
+    const trimmed = rawValue.trim();
+    const nextValue = Number(trimmed);
+    if (Number.isFinite(nextValue) && nextValue > 0) {
+      setValue(nextValue);
+      setInput(trimmed);
+      return nextValue;
+    }
+
+    setInput(String(currentValue));
+    return currentValue;
+  };
+
+  const applyTransientControls = () => {
+    const nextStop = commitPositiveNumber(tStopInput, tStop, setTStop, setTStopInput);
+    const nextStep = commitPositiveNumber(tStepInput, tStep, setTStep, setTStepInput);
+    return { nextStop, nextStep };
+  };
+
+  const applyACControls = () => {
+    const nextFrequency = commitPositiveNumber(frequencyInput, frequency, setFrequency, setFrequencyInput);
+    const nextSweepStart = commitPositiveNumber(sweepStartFreqInput, sweepStartFreq, setSweepStartFreq, setSweepStartFreqInput);
+    const nextSweepEnd = commitPositiveNumber(sweepEndFreqInput, sweepEndFreq, setSweepEndFreq, setSweepEndFreqInput);
+
+    if (nextSweepStart > nextSweepEnd) {
+      setSweepStartFreq(nextSweepEnd);
+      setSweepStartFreqInput(String(nextSweepEnd));
+      return { nextFrequency, nextSweepStart: nextSweepEnd, nextSweepEnd };
+    }
+
+    return { nextFrequency, nextSweepStart, nextSweepEnd };
+  };
+
+  const handleSimulate = () => {
+    if (analysisMode === 'Transient') {
+      applyTransientControls();
+    } else if (analysisMode === 'AC') {
+      applyACControls();
+    }
+
+    runSimulation();
+  };
 
   const loadExample = (mode: AnalysisMode, exampleIndex: number) => {
     const example = EXAMPLES_BY_MODE[mode][exampleIndex];
@@ -175,9 +230,80 @@ const App: React.FC = () => {
             <button onClick={() => setMode('code')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${mode === 'code' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}>Code</button>
             <button onClick={() => setMode('visual')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${mode === 'visual' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}>Visual</button>
           </div>
-          {analysisMode === 'AC' && <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5"><span className="text-[10px] font-black text-slate-400 uppercase">Freq</span><input type="number" value={frequency} onChange={(e) => setFrequency(parseFloat(e.target.value))} className="w-16 bg-transparent text-sm font-bold outline-none text-emerald-600" /><span className="text-[10px] font-black text-slate-400 uppercase">Hz</span></div>}
-          {analysisMode === 'Transient' && <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5"><span className="text-[10px] font-black text-slate-400 uppercase">Stop</span><input type="number" value={tStop} onChange={(e) => setTStop(parseFloat(e.target.value))} className="w-16 bg-transparent text-sm font-bold outline-none text-amber-600" /><span className="text-[10px] font-black text-slate-400 uppercase">s</span></div>}
-          <button onClick={() => runSimulation()} className={`${analysisMode === 'AC' ? 'bg-emerald-600' : analysisMode === 'Transient' ? 'bg-amber-600' : 'bg-blue-600'} text-white px-5 py-1.5 rounded-md flex items-center space-x-2 transition-all font-bold text-sm shadow-lg`}><Play className="w-4 h-4 fill-current" /><span>Simulate</span></button>
+          {analysisMode === 'AC' && (
+            <>
+              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5">
+                <span className="text-[10px] font-black text-slate-400 uppercase">Freq</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={frequencyInput}
+                  onChange={(e) => setFrequencyInput(e.target.value)}
+                  onBlur={applyACControls}
+                  onKeyDown={(e) => { if (e.key === 'Enter') applyACControls(); }}
+                  className="w-20 bg-transparent text-sm font-bold outline-none text-emerald-600"
+                />
+                <span className="text-[10px] font-black text-slate-400 uppercase">Hz</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5">
+                <span className="text-[10px] font-black text-slate-400 uppercase">Start</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={sweepStartFreqInput}
+                  onChange={(e) => setSweepStartFreqInput(e.target.value)}
+                  onBlur={applyACControls}
+                  onKeyDown={(e) => { if (e.key === 'Enter') applyACControls(); }}
+                  className="w-20 bg-transparent text-sm font-bold outline-none text-emerald-600"
+                />
+                <span className="text-[10px] font-black text-slate-400 uppercase">Hz</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5">
+                <span className="text-[10px] font-black text-slate-400 uppercase">End</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={sweepEndFreqInput}
+                  onChange={(e) => setSweepEndFreqInput(e.target.value)}
+                  onBlur={applyACControls}
+                  onKeyDown={(e) => { if (e.key === 'Enter') applyACControls(); }}
+                  className="w-20 bg-transparent text-sm font-bold outline-none text-emerald-600"
+                />
+                <span className="text-[10px] font-black text-slate-400 uppercase">Hz</span>
+              </div>
+            </>
+          )}
+          {analysisMode === 'Transient' && (
+            <>
+              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5">
+                <span className="text-[10px] font-black text-slate-400 uppercase">Stop</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={tStopInput}
+                  onChange={(e) => setTStopInput(e.target.value)}
+                  onBlur={applyTransientControls}
+                  onKeyDown={(e) => { if (e.key === 'Enter') applyTransientControls(); }}
+                  className="w-20 bg-transparent text-sm font-bold outline-none text-amber-600"
+                />
+                <span className="text-[10px] font-black text-slate-400 uppercase">s</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5">
+                <span className="text-[10px] font-black text-slate-400 uppercase">Step</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={tStepInput}
+                  onChange={(e) => setTStepInput(e.target.value)}
+                  onBlur={applyTransientControls}
+                  onKeyDown={(e) => { if (e.key === 'Enter') applyTransientControls(); }}
+                  className="w-20 bg-transparent text-sm font-bold outline-none text-amber-600"
+                />
+                <span className="text-[10px] font-black text-slate-400 uppercase">s</span>
+              </div>
+            </>
+          )}
+          <button onClick={handleSimulate} className={`${analysisMode === 'AC' ? 'bg-emerald-600' : analysisMode === 'Transient' ? 'bg-amber-600' : 'bg-blue-600'} text-white px-5 py-1.5 rounded-md flex items-center space-x-2 transition-all font-bold text-sm shadow-lg`}><Play className="w-4 h-4 fill-current" /><span>Simulate</span></button>
         </div>
       </header>
 
@@ -224,7 +350,7 @@ const App: React.FC = () => {
               <div className="flex-1 overflow-auto">
                 {view === 'chart' ? (
                   analysisMode === 'AC' ? (
-                    <FrequencySweepChart circuit={chartCircuit} selectedPlots={selectedPlots} startFreq={1} endFreq={1000000} steps={50} />
+                    <FrequencySweepChart circuit={chartCircuit} selectedPlots={selectedPlots} startFreq={sweepStartFreq} endFreq={sweepEndFreq} steps={50} />
                   ) : transientResults ? (
                     <TransientChart data={transientResults} selectedPlots={selectedPlots} />
                   ) : null
