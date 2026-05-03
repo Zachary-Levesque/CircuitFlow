@@ -76,6 +76,3 @@ CircuitFlow supports standard SPICE-like syntax:
 - **AC Analysis:** Frequency sweep with Bode plots.
 - **Non-linear Components:** Diodes and Transistors (using Newton-Raphson iteration).
 - **Visual Schematic Editor:** Drag-and-drop component placement.
-
----
-Built with ❤️ by Gemini CLI
