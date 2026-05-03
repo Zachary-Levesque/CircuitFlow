@@ -33,7 +33,9 @@ export function parseNetlist(netlist: string): Circuit {
     if (!line || line.startsWith('*') || line.startsWith('#')) continue;
 
     const parts = line.split(/\s+/);
-    if (parts.length < 4) continue;
+    if (parts.length < 4) {
+      throw new Error(`Line ${i + 1}: Invalid component definition. Expected format: [ID] [NodeA] [NodeB] [Value]`);
+    }
 
     const id = parts[0];
     const typeChar = id[0].toUpperCase();
@@ -45,9 +47,18 @@ export function parseNetlist(netlist: string): Circuit {
     if (typeChar === 'R') type = 'R';
     else if (typeChar === 'V') type = 'V';
     else if (typeChar === 'I') type = 'I';
-    else continue;
+    else {
+      throw new Error(`Line ${i + 1}: Unsupported component type "${typeChar}". Use R, V, or I.`);
+    }
 
     const value = parseValue(valueStr);
+    if (isNaN(value)) {
+      throw new Error(`Line ${i + 1}: Invalid value "${valueStr}" for component ${id}`);
+    }
+
+    if (type === 'R' && value === 0) {
+      throw new Error(`Line ${i + 1}: Resistor value cannot be zero.`);
+    }
 
     components.push({
       id,
@@ -60,6 +71,10 @@ export function parseNetlist(netlist: string): Circuit {
 
     nodesSet.add(nodeA);
     nodesSet.add(nodeB);
+  }
+
+  if (components.length > 0 && !nodesSet.has('0')) {
+    throw new Error('Circuit must contain a ground node (0).');
   }
 
   return {
