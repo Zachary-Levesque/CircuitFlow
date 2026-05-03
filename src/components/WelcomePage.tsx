@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Zap, Waves, ArrowRight, Github, Info } from 'lucide-react';
+import { Activity, Zap, Waves, ArrowRight, Github, Info, Edit3 } from 'lucide-react';
 
 interface WelcomePageProps {
   onSelectMode: (mode: 'dc' | 'ac') => void;
@@ -98,8 +98,5 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ onSelectMode }) => {
     </div>
   );
 };
-
-// Internal Import for icons since I'm using them
-import { Edit3 } from 'lucide-react';
 
 export default WelcomePage;
