@@ -46,6 +46,14 @@ const App: React.FC = () => {
     runSimulation(newNetlist);
   };
 
+  const handleUpdateComponent = (id: string, updates: Partial<Component>) => {
+    const newComponents = components.map(c => c.id === id ? { ...c, ...updates } : c);
+    setComponents(newComponents);
+    const newNetlist = serializeCircuit(newComponents);
+    setNetlist(newNetlist);
+    runSimulation(newNetlist);
+  };
+
   const handleRemoveComponent = (id: string) => {
     const newComponents = components.filter(c => c.id !== id);
     setComponents(newComponents);
@@ -150,6 +158,7 @@ const App: React.FC = () => {
               components={components} 
               onAddComponent={handleAddComponent} 
               onRemoveComponent={handleRemoveComponent}
+              onUpdateComponent={handleUpdateComponent}
               onClear={handleClear}
             />
           )}
