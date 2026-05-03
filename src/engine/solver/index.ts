@@ -16,6 +16,7 @@ export function solveDC(circuit: Circuit): SimulationResult {
     return { 
       nodeVoltages: {}, 
       branchCurrents: {}, 
+      voltageDrops: {},
       powerDissipation: {}, 
       error: 'Missing ground node (0). Place a component at 0,0 or node 0.' 
     };
@@ -92,22 +93,24 @@ export function solveDC(circuit: Circuit): SimulationResult {
     });
 
     const branchCurrents: Record<string, number> = {};
+    const voltageDrops: Record<string, number> = {};
     const powerDissipation: Record<string, number> = {};
 
     components.forEach(c => {
       const vA = nodeVoltages[c.nodeA] || 0;
       const vB = nodeVoltages[c.nodeB] || 0;
       const vDiff = vA - vB;
+      voltageDrops[c.id] = vDiff;
 
       if (c.type === 'R') {
         const current = vDiff / c.value;
         branchCurrents[c.id] = current;
         powerDissipation[c.id] = current * vDiff;
-      } else if (c.type === 'V') {
+      } else if (c.type === 'V' || c.type === 'W') {
         const vIdx = voltageSources.findIndex(v => v.id === c.id);
         const current = X.get([n + vIdx, 0]) as number;
         branchCurrents[c.id] = current;
-        powerDissipation[c.id] = -current * c.value;
+        powerDissipation[c.id] = -current * (c.type === 'W' ? 0 : c.value);
       } else if (c.type === 'I') {
         branchCurrents[c.id] = c.value;
         powerDissipation[c.id] = -c.value * vDiff;
@@ -117,6 +120,7 @@ export function solveDC(circuit: Circuit): SimulationResult {
     return {
       nodeVoltages,
       branchCurrents,
+      voltageDrops,
       powerDissipation
     };
   } catch (err: any) {
