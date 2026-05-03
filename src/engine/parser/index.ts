@@ -11,6 +11,7 @@ const UNIT_MAP: Record<string, number> = {
 };
 
 function parseValue(valStr: string): number {
+  if (!valStr) return 0;
   const match = valStr.match(/^([\d.]+)([a-zA-Z]*)$/);
   if (!match) return parseFloat(valStr);
 
@@ -30,9 +31,8 @@ export function parseNetlist(netlist: string): Circuit {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line) continue;
+    if (!line || line.startsWith('*')) continue;
 
-    // Support position metadata in comments: # pos id x1 y1 x2 y2
     if (line.startsWith('# pos')) {
       const parts = line.split(/\s+/);
       const id = parts[2];
@@ -42,13 +42,13 @@ export function parseNetlist(netlist: string): Circuit {
           x1: parseFloat(parts[3]),
           y1: parseFloat(parts[4]),
           x2: parseFloat(parts[5]),
-          y2: parseFloat(parts[6])
+          y2: parseFloat(parts[6]),
+          x3: parts[7] ? parseFloat(parts[7]) : undefined,
+          y3: parts[8] ? parseFloat(parts[8]) : undefined
         };
       }
       continue;
     }
-
-    if (line.startsWith('*')) continue;
 
     const parts = line.split(/\s+/);
     if (parts.length < 3) continue;
@@ -57,36 +57,48 @@ export function parseNetlist(netlist: string): Circuit {
     const typeChar = id[0].toUpperCase();
     const nodeA = parts[1];
     const nodeB = parts[2];
-    const valueStr = parts[3] || '0';
-
+    
     let type: ComponentType;
     if (typeChar === 'R') type = 'R';
     else if (typeChar === 'V') type = 'V';
     else if (typeChar === 'I') type = 'I';
     else if (typeChar === 'W') type = 'W';
+    else if (typeChar === 'L') type = 'L';
+    else if (typeChar === 'C') type = 'C';
+    else if (typeChar === 'D') type = 'D';
+    else if (typeChar === 'Q') type = 'Q';
     else continue;
 
+    let nodeC: string | undefined;
+    let valIdx = 3;
+
+    if (type === 'Q') {
+      nodeC = parts[3];
+      valIdx = 4;
+    }
+
+    const valueStr = parts[valIdx] || '0';
+    const extraStr = parts[valIdx + 1] || '0';
+
     const value = type === 'W' ? 0 : parseValue(valueStr);
+    const extra = parseValue(extraStr);
     
     components.push({
       id,
       type,
       nodeA,
       nodeB,
+      nodeC,
       value,
-      originalValue: valueStr
+      originalValue: valueStr,
+      phase: (type === 'V' || type === 'I') ? extra : undefined,
+      beta: (type === 'Q') ? extra : undefined
     });
 
     nodesSet.add(nodeA);
     nodesSet.add(nodeB);
+    if (nodeC) nodesSet.add(nodeC);
   }
 
-  if (components.length > 0 && !nodesSet.has('0')) {
-    // We'll be lenient during visual editing, but solver will catch it
-  }
-
-  return {
-    components,
-    nodes: Array.from(nodesSet)
-  };
+  return { components, nodes: Array.from(nodesSet) };
 }
